@@ -1,4 +1,4 @@
-// Console Game of Life (cgol) -- Lightweight terminal integrated 2D simulation
+// cgol (Console Game of Life) -- run the game of life in the terminal
 // Copyright (C) 2022 Cyprien Lacassagne
 
 // This program is free software: you can redistribute it and/or modify
