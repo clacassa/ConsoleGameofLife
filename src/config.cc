@@ -20,13 +20,19 @@
 
 // Display version information
 void print_version(std::string prog_name) {
-	std::cout << "\n";
-	std::cout << "     _____  "  "\x1b[36m" << prog_name << " (Console Game of Life) "
-			  << VERSION << "\n\x1b[0m";
-	std::cout << "  __|__   | Copyright (C) 2022 " << AUTHOR << "\n";
-	std::cout << " |__|  |  | This is free software: you are free to change and redistribute it.\n";
-	std::cout << "       |__| There is NO WARRANTY, to the extent permitted by law.\n\n";
-	std::cout << "            Written by " << AUTHOR << "\n";
+
+	std::cout << "\x1b[36m" << prog_name << " (Console Game of Life) ";
+	std::cout << VERSION << "\n\x1b[0m";
+	std::cout << "Copyright (C) 2022 " << AUTHOR << "\n";
+	std::cout << "This is free software: you are free to change and redistribute it.\n";
+	std::cout << "There is no WARRANTY, to the extent permitted by law.\n\n";
+
+	// std::cout << "\n";
+	// std::cout << "    _____  "  "\x1b[36m" << prog_name << " (Console Game of Life) "
+	// 		  << VERSION << "\n\x1b[0m";
+	// std::cout << " __|__   | Copyright (C) 2022 " << AUTHOR << "\n";
+	// std::cout << "|__|  |  | This is free software: you are free to change and redistribute it.\n";
+	// std::cout << "      |__| There is NO WARRANTY, to the extent permitted by law.\n\n";
 }
 
 // Display help
