@@ -28,7 +28,6 @@ enum Init { RANDOM_INIT, GLIDERGUN_INIT, FILE_INIT };
 constexpr unsigned world_size(40);
 constexpr unsigned init_refresh(100);
 constexpr unsigned max_time(150);
-const std::string error_checker("dontforgetlastline");
 
 class Simulation {
 	struct Cell {
@@ -53,6 +52,7 @@ public:
     void set_refresh(unsigned ref);
     void toggle_stab_end();
     void start_sim(Init init = GLIDERGUN_INIT);
+    void end_sim(unsigned nb_start, unsigned nb_end);
     bool update(Mode mode = NORMAL);
 
     bool get_stab_end();

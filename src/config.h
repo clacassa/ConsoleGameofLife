@@ -27,9 +27,10 @@
 #endif // _WIN32
 
 #define AUTHOR "Cyprien Lacassagne"
-#define VERSION "1.0"
+#define VERSION "0.1.0" // Initial release version, as this program
+						// is just for entertainment, it might not be released
 
 void print_version(std::string prog_name);
 void print_help(std::string prog_name);
 
-#endif // CONFIG_H
+#endif

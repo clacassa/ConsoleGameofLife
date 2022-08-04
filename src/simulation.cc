@@ -37,7 +37,7 @@ static bool past_stable(false);
 enum reading_State { NB_CELLS, COORDINATES, END, OK };
 
 static int state(NB_CELLS);
-static unsigned i(0), total(0);
+static unsigned i(0), total(0), line_nb(0);
 static unsigned x(0), y(0);
 
 Simulation::Simulation(int rfrsh_rate)
@@ -59,6 +59,7 @@ void Simulation::read_file(std::string filename) {
     state = NB_CELLS;
     i = 0;
     total = 0;
+    line_nb = 0;
     x = 0;
     y = 0;
 
@@ -70,17 +71,16 @@ void Simulation::read_file(std::string filename) {
         unsigned pos(filename.find_last_of("."));
         std::string extension(filename.substr(pos + 1));
         if (extension != "txt") {
-            std::cout << "\x1b[91m" "Failed reading the file.\n" "\x1b[0m";
+            std::cout << "\x1b[91m" "error: \x1b[0m" "expected a .txt file\n" "\x1b[0m";
             exit(EXIT_FAILURE);
         }
     	// Read the file line by line, ignoring those starting with '#'
         while (getline(file >> std::ws, line)) {
+            ++line_nb;
             if (line[0] == '#') continue;
             line_decoding(line);
         }
-        line_decoding(error_checker);
-        std::cout << "\x1b[92m" "Correct file.\n" "\x1b[0m";
-        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+        line_decoding("error_checker");
     }else {
     	error(READING_OPENING);
     }
@@ -96,6 +96,7 @@ void Simulation::line_decoding(std::string line) {
         	break;
         }
         if (total < 0 or total > world_size*world_size) {
+            //std::cout << filename << ": ";
             std::cout << "The specified # of cells is out of range\n";
             state = END;
         }
@@ -105,12 +106,19 @@ void Simulation::line_decoding(std::string line) {
         data >> x >> y;
         if (x < 0 or y < 0 or x >= world_size or y >= world_size) {
 			std::cout << "Some coordinates are out of range\n";
+            std::cout << "  " << line_nb << "  " << "|  ";
+            if (x < 0 || x >= world_size) {
+                std::cout << "\x1b[91m" << x << " \x1b[0m" << y << "\n";
+            }
+            else {
+                std::cout << x << " " << "\x1b[91m" << y << "\n\x1b[0m";
+            }
             state = END;
         }else {
 //        	new_birth(x, y);
 			file_data.push_back({x, y});
         	++i;
-        	if (i == total) state = OK;
+        	if (i == total + 1) state = OK;
         	else state = COORDINATES;
         }
         break;
@@ -127,13 +135,13 @@ void Simulation::line_decoding(std::string line) {
 void Simulation::error(Error_reading code) {
     switch(code) {
     case READING_OPENING:
-        std::cout << "\x1b[91m" "Failed opening the file. Make sure the file exists.\n" "\x1b[0m";
+        std::cout << "\x1b[91m" "error: \x1b[0m" "failed opening the file: make sure the file exists\n";
         exit(EXIT_FAILURE);
     case READING_END:
-        std::cout << "\x1b[91m" "Failed configuring the simulation (invalid values)\n" "\x1b[0m";
+        std::cout << "\x1b[91m" "error: \x1b[0m" "failed configuring the simulation: invalid values\n";
      	exit(EXIT_FAILURE);
     default:
-        std::cout << "An unknown error occured.\n";
+        std::cout << "An unknown error occured\n";
        	exit(EXIT_FAILURE);
     }
 }
@@ -176,7 +184,7 @@ void Simulation::start_sim(Init init) {
         }else {
         	// This is executed if the simulation is started from a file
         	for (unsigned i(0); i < file_data.size(); ++i) {
-        		new_birth(file_data[i].x, file_data[i].y);
+        	    new_birth(file_data[i].x, file_data[i].y);
         	}
         	// Store the initial number of alive cells
             nb_start = file_data.size();
@@ -184,10 +192,15 @@ void Simulation::start_sim(Init init) {
         if (stab_end) {
         	// This is executed if the option "end when stabilized" is "On"
     		while (!update(EXPERIMENTAL)) {
-        	std::this_thread::sleep_for(std::chrono::milliseconds(refresh_rate));
-			std::cout << "\x1b[2J\x1b[H";
-        	nb_end = display();
-        	++count;
+        	    std::this_thread::sleep_for(std::chrono::milliseconds(refresh_rate));
+			    std::cout << "\x1b[2J\x1b[H";
+        	    nb_end = display();
+        	    ++count;
+                if (nb_end == 0) {
+                    std::cout << "Every cell have died\n";
+                    end_sim(nb_start, nb_end);
+                    return;
+                }
     		}
     	}else {
     		while (true) {
@@ -200,23 +213,37 @@ void Simulation::start_sim(Init init) {
     			if (((float) end - start)/CLOCKS_PER_SEC >= max_time) {
     				break;
     			}
+                if (nb_end == 0) {
+                    std::cout << "\x1b[0m" "Every cell have died\n";
+                    end_sim(nb_start, nb_end);
+                    return;
+                }
     		}
     	}
         if (stab_end) {
-    		std::cout << "\nStability reached after " << count - 5 << " steps!\n";
+    		std::cout << "\nStability reached after " << count - 4;
+            if (count-4 >= 2) {
+                std::cout << " steps!\n";
+            }else {
+                std::cout << " step!\n";
+            }
     	}
     }
     if (!stab_end) {
     	std::cout << "\n\nAuto stop after " << max_time << " seconds.\n";
 	}
+    end_sim(nb_start, nb_end);
+}
+
+void Simulation::end_sim(unsigned nb_start, unsigned nb_end) {
     // Emit a bell sound
     std::cout << "\a";
-	this->init();
+    this->init();
     std::cout << "Alive cells\n";
     std::cout << "Start: " << nb_start << "\n";
     std::cout << "End: " << nb_end << "\n";
-	std::cout << "\x1b[36m" "\33[6m" "Press Enter to continue..." "\x1b[0m" "\33[0m";
-	std::cin.get();
+    std::cout << "\x1b[36m" "\33[6m" "Press Enter to continue..." "\x1b[0m" "\33[0m";
+    std::cin.get();
 }
 
 void Simulation::toggle_stab_end() {
