@@ -23,6 +23,8 @@
 #include "config.h"
 
 void go_to_menu(std::string filename, unsigned refresh);
+std::string define_prog_name(char* argv[]);
+void parse_option(int argc, char* argv[], std::string prog_name, std::string& __filename);
 void clear();
 void shell();
 
@@ -32,43 +34,8 @@ int main(int argc, char* argv[]) {
 
 	srand((unsigned) time(0));
 	std::string filename("");
-
-	// Define the programm name
-	#ifdef _WIN32
-		std::string EXEC_PATH = argv[0];
-		if (EXEC_PATH.find_last_of("\\") != std::string::npos) {
-			unsigned pos(EXEC_PATH.find_last_of("\\"));
-			EXEC_PATH = EXEC_PATH.substr(pos + 1);
-			pos = EXEC_PATH.find_first_of(".");
-			EXEC_PATH = EXEC_PATH.replace(pos, EXEC_PATH.length(), "");
-		}
-		const std::string PROGRAM_NAME = EXEC_PATH;
-	#else
-		const std::string PROGRAM_NAME = argv[0];
-	#endif
-
-	// Option parsing
-	if (argc == 2) {
-		if (strcmp(argv[1], "--version") == 0 || strcmp(argv[1], "-V") == 0) {
-			print_version(PROGRAM_NAME);
-			exit(EXIT_SUCCESS);
-		}
-		if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
-			print_help(PROGRAM_NAME);
-			exit(EXIT_SUCCESS);
-		}
-		if (std::string(argv[1]).find_first_of("-") == 0) {
-			std::cout << PROGRAM_NAME << " : the option \"" << argv[1] << "\" is not recognized.\n";
-			std::cout << "use \"" << PROGRAM_NAME << " -h\" for a complete list of options\n";
-			exit(EXIT_FAILURE);
-		}
-		filename = argv[1];
-	}
-	if (argc >= 3) {
-		std::cout << "cgol: \x1b[91merror: \x1b[0m1 argument expected, " << argc - 1
-				  << " provided.\n";
-		exit(EXIT_FAILURE);
-	}
+	const std::string PROGRAM_NAME = define_prog_name(argv);
+	parse_option(argc, argv, PROGRAM_NAME, filename);
 
 	// Initialize variables and Simulation instance
 	Simulation sim(init_refresh);
@@ -88,7 +55,6 @@ int main(int argc, char* argv[]) {
 		if (input == "q") {
 			return 0;
 		}
-
 		if (input == "t") {
 			sim.toggle_stab_end();
 			__stab_end = sim.get_stab_end();
@@ -110,7 +76,6 @@ int main(int argc, char* argv[]) {
 			sim.set_refresh(refresh);
 			go_to_menu(filename, refresh);
 		}
-
 		// Initialization option parsing
 		else if (input == "r") {
 			sim.start_sim(RANDOM_INIT);
@@ -139,7 +104,6 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-// Display context menu
 void go_to_menu(std::string filename, unsigned refresh) {
 	clear();
 	std::cout << "\x1b[36m" "\33[52m" \
@@ -157,23 +121,58 @@ void go_to_menu(std::string filename, unsigned refresh) {
 	std::cout << "You can toggle this option by pressing 't'.\n\n" \
 				 "Press 's' to change the speed (\x1b[36m" << refresh
 			  << "\x1b[0m ms/frame)\n" \
-				 "Press 'r' to start the simulation from random.\n";
+				 "Press 'r' to start the simulation from random\n";
 	if (filename != "") {
-		std::cout << "\x1b[35mPress 'f' to start from your text file.\n\x1b[0m";
+		std::cout << "\x1b[35mPress 'f' to start from your text file\n\x1b[0m";
 	}
 	std::cout << "Press 'g' to start with the glider gun\n" \
-				 "Press 'q' to quit.\n";
+				 "Press 'q' to quit\n";
 	shell();
 	return;
 }
 
-// Clear the screen and the scrollback buffer
+std::string define_prog_name(char* argv[]) {
+	#ifdef _WIN32
+		std::string EXEC_PATH = argv[0];
+		if (EXEC_PATH.find_last_of("\\") != std::string::npos) {
+			unsigned pos(EXEC_PATH.find_last_of("\\"));
+			EXEC_PATH = EXEC_PATH.substr(pos + 1);
+			pos = EXEC_PATH.find_first_of(".");
+			EXEC_PATH = EXEC_PATH.replace(pos, EXEC_PATH.length(), "");
+		}
+		return EXEC_PATH;
+	#else
+		return argv[0];
+	#endif
+}
+
+void parse_option(int argc, char* argv[], std::string prog_name, std::string& __filename) {
+	if (argc == 2) {
+		if (strcmp(argv[1], "--version") == 0 || strcmp(argv[1], "-V") == 0) {
+			print_version(prog_name);
+			exit(EXIT_SUCCESS);
+		}
+		if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
+			print_help(prog_name);
+			exit(EXIT_SUCCESS);
+		}
+		if (std::string(argv[1]).find_first_of("-") == 0) {
+			std::cout << prog_name << " : the option \"" << argv[1] << "\" is not recognized.\n";
+			std::cout << "use \"" << prog_name << " -h\" for a complete list of options\n";
+			exit(EXIT_FAILURE);
+		}
+		__filename = argv[1];
+	}
+	if (argc >= 3) {
+		std::cout << "cgol: \x1b[91merror: \x1b[0m1 argument expected, " << argc - 1
+				  << " provided.\n";
+		exit(EXIT_FAILURE);
+	}
+}
+
 void clear() {
 	system(CLEAR_SCREEN);
 }
-// void clear() {
-// 	std::cout << "\x1b[3J\x1b[H";
-// }
 
 // Display the '>' character to make it look like a shell entry
 void shell() {
