@@ -212,6 +212,9 @@ void Simulation::start_sim(Init init) {
     // Emit a bell sound
     std::cout << "\a";
 	this->init();
+    std::cout << "Alive cells\n";
+    std::cout << "Start: " << nb_start << "\n";
+    std::cout << "End: " << nb_end << "\n";
 	std::cout << "\x1b[36m" "\33[6m" "Press Enter to continue..." "\x1b[0m" "\33[0m";
 	std::cin.get();
 }
