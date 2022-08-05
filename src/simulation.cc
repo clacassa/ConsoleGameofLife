@@ -1,18 +1,22 @@
-// cgol (Console Game of Life) -- run the game of life in the terminal
-// Copyright (C) 2022 Cyprien Lacassagne
+/************************************************************************
 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+*   cgol (Console Game of Life) -- run the game of life in the terminal
+*   Copyright (C) 2022 Cyprien Lacassagne
 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+*   This program is free software: you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation, either version 3 of the License, or
+*   (at your option) any later version.
 
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
+
+*   You should have received a copy of the GNU General Public License
+*   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+*************************************************************************/
 
 #include <iostream>
 #include <fstream>
@@ -37,8 +41,7 @@ static bool past_stable(false);
 enum reading_State { NB_CELLS, COORDINATES, END, OK };
 
 static int state(NB_CELLS);
-static unsigned i(0), total(0), line_nb(0);
-static unsigned x(0), y(0);
+static unsigned i(0), total(0), line_nb(0), x(0), y(0);
 
 Simulation::Simulation(int rfrsh_rate)
 : refresh_rate(rfrsh_rate) {
@@ -78,15 +81,15 @@ void Simulation::read_file(std::string filename) {
         while (getline(file >> std::ws, line)) {
             ++line_nb;
             if (line[0] == '#') continue;
-            line_decoding(line);
+            line_decoding(line, filename);
         }
-        line_decoding("error_checker");
+        line_decoding("error_checker", filename);
     }else {
     	error(READING_OPENING);
     }
 }
 
-void Simulation::line_decoding(std::string line) {
+void Simulation::line_decoding(std::string line, std::string filename) {
     std::istringstream data(line);
 
     switch(state) {
@@ -95,8 +98,8 @@ void Simulation::line_decoding(std::string line) {
         	state = END;
         	break;
         }
-        if (total < 0 or total > world_size*world_size) {
-            //std::cout << filename << ": ";
+        if (total < 0 || total > world_size*world_size) {
+            std::cout << filename << ": ";
             std::cout << "The specified # of cells is out of range\n";
             state = END;
         }
@@ -104,7 +107,8 @@ void Simulation::line_decoding(std::string line) {
         break;
     case COORDINATES:
         data >> x >> y;
-        if (x < 0 or y < 0 or x >= world_size or y >= world_size) {
+        if (x < 0 || y < 0 || x >= world_size || y >= world_size) {
+            std::cout << filename << ": ";
 			std::cout << "Some coordinates are out of range\n";
             std::cout << "  " << line_nb << "  " << "|  ";
             if (x < 0 || x >= world_size) {
@@ -115,7 +119,6 @@ void Simulation::line_decoding(std::string line) {
             }
             state = END;
         }else {
-//        	new_birth(x, y);
 			file_data.push_back({x, y});
         	++i;
         	if (i == total + 1) state = OK;
@@ -214,15 +217,15 @@ void Simulation::start_sim(Init init) {
     				break;
     			}
                 if (nb_end == 0) {
-                    std::cout << "\x1b[0m" "Every cell have died\n";
+                    std::cout << "\n\x1b[0m" "Every cell have died\n";
                     end_sim(nb_start, nb_end);
                     return;
                 }
     		}
     	}
         if (stab_end) {
-    		std::cout << "\nStability reached after " << count - 4;
-            if (count-4 >= 2) {
+    		std::cout << "\nStability reached after " << count - oscillation_period;
+            if (count - oscillation_period >= 2) {
                 std::cout << " steps!\n";
             }else {
                 std::cout << " step!\n";
@@ -230,7 +233,7 @@ void Simulation::start_sim(Init init) {
     	}
     }
     if (!stab_end) {
-    	std::cout << "\n\nAuto stop after " << max_time << " seconds.\n";
+    	std::cout << "\n\nAuto stop after " << max_time << " seconds\n";
 	}
     end_sim(nb_start, nb_end);
 }
@@ -240,8 +243,8 @@ void Simulation::end_sim(unsigned nb_start, unsigned nb_end) {
     std::cout << "\a";
     this->init();
     std::cout << "Alive cells\n";
-    std::cout << "Start: " << nb_start << "\n";
-    std::cout << "End: " << nb_end << "\n";
+    std::cout << "  Start: " << nb_start << "\n";
+    std::cout << "  End: " << nb_end << "\n";
     std::cout << "\x1b[36m" "\33[6m" "Press Enter to continue..." "\x1b[0m" "\33[0m";
     std::cin.get();
 }
@@ -273,7 +276,7 @@ void Simulation::birth_test(unsigned x, unsigned y) {
             new_birth(x, y);
         }
     }else {
-        if (neighbours(x, y) == 2 or neighbours(x, y) == 3) {
+        if (neighbours(x, y) == 2 || neighbours(x, y) == 3) {
             new_birth(x, y);
             --nb_alive;
         }else {
@@ -285,31 +288,31 @@ void Simulation::birth_test(unsigned x, unsigned y) {
 unsigned Simulation::neighbours(unsigned x, unsigned y) {
     unsigned n(0);
 
-    if (x == 0 and y == 0) {
+    if (x == 0 && y == 0) {
         if (grid[world_size-2][y]) ++n;
         if (grid[world_size-2][y+1]) ++n;
         if (grid[world_size-1][y+1]) ++n;
         return n;
     }
-    if (x == world_size-1 and y == 0) {
+    if (x == world_size-1 && y == 0) {
         if (grid[world_size-2][world_size-1]) ++n;
         if (grid[world_size-2][world_size-2]) ++n;
         if (grid[world_size-1][world_size-2]) ++n;
         return n;
     }
-    if (x == world_size-1 and y == world_size-1) {
+    if (x == world_size-1 && y == world_size-1) {
         if (grid[0][world_size-2]) ++n;
         if (grid[1][world_size-2]) ++n;
         if (grid[1][world_size-1]) ++n;
         return n;
     }
-    if (x == 0 and y == world_size-1) {
+    if (x == 0 && y == world_size-1) {
         if (grid[1][0]) ++n;
         if (grid[1][1]) ++n;
         if (grid[0][1]) ++n;
         return n;
     }
-    if (x == 0 and y != 0 and y != world_size-1) {
+    if (x == 0 && y != 0 && y != world_size-1) {
         if (grid[world_size-y][x]) ++n;
         if (grid[world_size-y-2][x]) ++n;
         if (grid[world_size-y][x+1]) ++n;
@@ -317,7 +320,7 @@ unsigned Simulation::neighbours(unsigned x, unsigned y) {
         if (grid[world_size-y-2][x+1]) ++n;
         return n;
     }
-    if (y == 0 and x != 0 and x != world_size-1) {
+    if (y == 0 && x != 0 && x != world_size-1) {
         if (grid[world_size-1][x-1]) ++n;
         if (grid[world_size-1][x+1]) ++n;
         if (grid[world_size-2][x-1]) ++n;
@@ -325,7 +328,7 @@ unsigned Simulation::neighbours(unsigned x, unsigned y) {
         if (grid[world_size-2][x+1]) ++n;
         return n;
     }
-    if (x == world_size-1 and y != 0 and y != world_size-1) {
+    if (x == world_size-1 && y != 0 && y != world_size-1) {
         if (grid[world_size-y][x]) ++n;
         if (grid[world_size-y-2][x]) ++n;
         if (grid[world_size-y][x-1]) ++n;
@@ -333,7 +336,7 @@ unsigned Simulation::neighbours(unsigned x, unsigned y) {
         if (grid[world_size-y-2][x-1]) ++n;
         return n;
     }
-    if (y == world_size-1 and x != 0 and x != world_size-1) {
+    if (y == world_size-1 && x != 0 && x != world_size-1) {
         if (grid[0][x-1]) ++n;
         if (grid[0][x+1]) ++n;
         if (grid[1][x-1]) ++n;
@@ -357,6 +360,7 @@ void Simulation::set_refresh(unsigned ref) {
 }
 
 bool Simulation::update(Mode mode) {
+
     past_5_alive = past_4_alive;
     past_4_alive = past_3_alive;
     past_3_alive = past_2_alive;
@@ -366,6 +370,7 @@ bool Simulation::update(Mode mode) {
     nb_dead = 0;
     past_stable = stable;
     stable = false;
+
     for (unsigned i(0); i < grid.size(); ++i) {
         for (unsigned j(0); j < grid[i].size(); ++j) {
             grid[i][j] = updated_grid[i][j];
@@ -381,6 +386,8 @@ bool Simulation::update(Mode mode) {
             birth_test(j, world_size - 1 - i);
         }
     }
+    // Check for any perdiodic pattern to determine if the state of the simulation is stable
+    // Fot the moment, this works for oscillations of a period of 5 and less
     if (mode == EXPERIMENTAL) {
         //std::cout << nb_alive << " " << past_alive << " " << past_2_alive << " " << past_3_alive << "\n";
         if (nb_alive == past_alive && past_alive == past_2_alive && past_2_alive == past_3_alive) {

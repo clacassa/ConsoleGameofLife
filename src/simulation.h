@@ -1,18 +1,22 @@
-// cgol (Console Game of Life) -- run the game of life in the terminal
-// Copyright (C) 2022 Cyprien Lacassagne
+/************************************************************************
 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+*	cgol (Console Game of Life) -- run the game of life in the terminal
+*	Copyright (C) 2022 Cyprien Lacassagne
 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+*	This program is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+*	(at your option) any later version.
 
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*	This program is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+
+*	You should have received a copy of the GNU General Public License
+*	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+*************************************************************************/
 
 #ifndef SIMULATION_H
 #define SIMULATION_H
@@ -27,7 +31,10 @@ enum Init { RANDOM_INIT, GLIDERGUN_INIT, FILE_INIT };
 
 constexpr unsigned world_size(40);
 constexpr unsigned init_refresh(100);
+constexpr unsigned refresh_min(10);
+constexpr unsigned refresh_max(200);
 constexpr unsigned max_time(150);
+constexpr unsigned oscillation_period(4);
 
 class Simulation {
 	struct Cell {
@@ -44,7 +51,7 @@ public:
     Simulation(int rfrsh_rate);
     ~Simulation();
     void read_file(std::string filename);
-    void line_decoding(std::string line);
+    void line_decoding(std::string line, std::string filename);
     void error(Error_reading code);
 
     unsigned display();

@@ -1,18 +1,22 @@
-// cgol (Console Game of Life) -- run the game of life in the terminal
-// Copyright (C) 2022 Cyprien Lacassagne
+/************************************************************************
 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+*	cgol (Console Game of Life) -- run the game of life in the terminal
+*	Copyright (C) 2022 Cyprien Lacassagne
 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+*	This program is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+*	(at your option) any later version.
 
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*	This program is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+
+*	You should have received a copy of the GNU General Public License
+*	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+*************************************************************************/
 
 #include <iostream>
 #include <cstdlib>
@@ -62,17 +66,17 @@ int main(int argc, char* argv[]) {
 		}
 		else if (input == "s"){
 			do {
-				std::cout << "simulation speed [10, 200]: ";
+				std::cout << "simulation speed [" << refresh_min << ", " << refresh_max << "]: ";
 				// Exit the loop if the input is not an integer
 				 if (!(std::cin >> refresh)) {
 					std::cin.clear();
 					std::cin.ignore(10000, '\n');
-					std::cout << "\x1b[38;5;3mInvalid input.\n\x1b[0m";
+					std::cout << "\x1b[38;5;3mInvalid input\n\x1b[0m";
 					refresh = sim.get_refrsh_rate();
 					std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 					break;
 				}
-			}while (refresh > 200 || refresh < 10);
+			}while (refresh > refresh_max || refresh < refresh_min);
 			sim.set_refresh(refresh);
 			go_to_menu(filename, refresh);
 		}
@@ -157,8 +161,8 @@ void parse_option(int argc, char* argv[], std::string prog_name, std::string& __
 			exit(EXIT_SUCCESS);
 		}
 		if (std::string(argv[1]).find_first_of("-") == 0) {
-			std::cout << prog_name << " : the option \"" << argv[1] << "\" is not recognized.\n";
-			std::cout << "use \"" << prog_name << " -h\" for a complete list of options\n";
+			std::cout << prog_name << " : the option \"" << argv[1] << "\" is not recognized\n";
+			std::cout << "Use \"" << prog_name << " -h\" for a complete list of options\n";
 			exit(EXIT_FAILURE);
 		}
 		__filename = argv[1];
