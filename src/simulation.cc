@@ -401,16 +401,17 @@ bool Simulation::update(Mode mode) {
 
 unsigned Simulation::display() {
     unsigned alive(0);
+    char square(254);
     for (unsigned i(0); i < grid.size(); ++i) {
         std::cout << "\n";
         for (unsigned j(0); j < grid[i].size(); ++j) {
             if (grid[i][j]) {
-                std::cout << "%";
+                std::cout << square;
                 ++alive;
             }else {
                 std::cout << " ";
             }
-            //std::cout << " ";
+            std::cout << " ";
         }
     }
     return alive;
