@@ -157,7 +157,8 @@ void Simulation::start_sim(Init init) {
 	clock_t start(clock());
 	clock_t end;
 	unsigned count(0);
-    unsigned nb_start, nb_end;
+    unsigned nb_start(glider_gun_cells);
+    unsigned nb_end;
 	if (init == GLIDERGUN_INIT) {
 		this->init();
 		draw_canon_planeur(0, 0);
@@ -165,7 +166,7 @@ void Simulation::start_sim(Init init) {
             std::this_thread::sleep_for(std::chrono::milliseconds(refresh_rate));
 			std::cout << "\x1b[2J\x1b[H";
     		update();
-            display();
+            nb_end = display();
             ++count;
             end = clock();
             if (((float) end - start)/CLOCKS_PER_SEC >= max_time) {
@@ -232,7 +233,7 @@ void Simulation::start_sim(Init init) {
             }
     	}
     }
-    if (!stab_end) {
+    if (!stab_end || init == GLIDERGUN_INIT) {
     	std::cout << "\n\nAuto stop after " << max_time << " seconds\n";
 	}
     end_sim(nb_start, nb_end);
@@ -241,6 +242,7 @@ void Simulation::start_sim(Init init) {
 void Simulation::end_sim(unsigned nb_start, unsigned nb_end) {
     // Emit a bell sound
     std::cout << "\a";
+    
     this->init();
     std::cout << "Alive cells\n";
     std::cout << "  Start: " << nb_start << "\n";

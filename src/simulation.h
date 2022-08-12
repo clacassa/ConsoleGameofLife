@@ -35,6 +35,7 @@ constexpr unsigned refresh_min(10);
 constexpr unsigned refresh_max(200);
 constexpr unsigned max_time(150);
 constexpr unsigned oscillation_period(4);
+constexpr unsigned glider_gun_cells(35);
 
 class Simulation {
 	struct Cell {
