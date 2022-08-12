@@ -12,7 +12,7 @@ from 10 to 200 ms.
 - Stability detection: This is an option that when set On, stops the game when the world  
 becomes stable; that means, when all shapes are either immuable or periodically stable  
 (they constantly change, but they fall in the same state each period of time, like an ideal spring oscillation).  
-This feature detects oscillations of period 15 and lower.  
+This feature detects oscillations of period 5 and lower.  
 - Glider gun: Allow you to start the game with a glider gun in the bottom-left corner.  
 
 ## Build/Setup
