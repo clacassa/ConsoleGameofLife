@@ -109,7 +109,7 @@ void Simulation::line_decoding(std::string line, std::string filename) {
         data >> x >> y;
         if (x < 0 || y < 0 || x >= world_size || y >= world_size) {
             std::cout << filename << ": ";
-			std::cout << "Some coordinates are out of range\n";
+			std::cout << "Some coordinates are out of range [0, 39]\n";
             std::cout << "  " << line_nb << "  " << "|  ";
             if (x < 0 || x >= world_size) {
                 std::cout << "\x1b[91m" << x << " \x1b[0m" << y << "\n";

@@ -169,7 +169,7 @@ void parse_option(int argc, char* argv[], std::string prog_name, std::string& __
 	}
 	if (argc >= 3) {
 		std::cout << "cgol: \x1b[91merror: \x1b[0m1 argument expected, " << argc - 1
-				  << " provided.\n";
+				  << " provided\n";
 		exit(EXIT_FAILURE);
 	}
 }
