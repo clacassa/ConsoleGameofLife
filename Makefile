@@ -23,10 +23,14 @@ EXEDIR = ./bin
 SRCDIR = ./src
 VPATH = $(SRCDIR):$(EXEDIR)
 
+ifeq ($(OS),Windows_NT)
+OFILES += ./res/my_res
+endif
+
 all: $(EXEDIR)/$(OUT)
 
 $(EXEDIR)/$(OUT): $(SRCDIR)/main.o $(SRCDIR)/simulation.o $(SRCDIR)/config.o
-	$(CXX) $(SRCDIR)/main.o $(SRCDIR)/simulation.o $(SRCDIR)/config.o ./res/my.res -o $@
+	$(CXX) $(SRCDIR)/main.o $(SRCDIR)/simulation.o $(SRCDIR)/config.o -o $@
 
 $(SRCDIR)/main.o: main.cc simulation.h config.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
